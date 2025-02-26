@@ -13,55 +13,72 @@ fun Application.configureRouting() {
     val clientRepository = MemoryClientRepository()
 
     routing {
-        get("/") {
-            call.respondText("Hello World!")
-        }
-
-        get("/client") {
+        get("/clients") {
             val clients = clientRepository.getAllClient()
             if (clients.isEmpty()) {
-                call.respond(HttpStatusCode.NotFound, "Clientes no encontrados")
+                call.respond(HttpStatusCode.NotFound, "No hay clientes registrados.")
             } else {
                 call.respond(HttpStatusCode.OK, clients)
             }
         }
 
-        post("/client") {
+        post("/clients") {
             val client = call.receive<Client>()
             val result = clientRepository.postClient(client)
             if (result) {
-                call.respond(HttpStatusCode.Created, "Cliente agregado exitosamente")
+                call.respond(HttpStatusCode.Created, "Cliente agregado exitosamente.")
             } else {
-                call.respond(HttpStatusCode.Conflict, "El cliente ya existe")
+                call.respond(HttpStatusCode.Conflict, "El cliente ya existe.")
             }
         }
 
-        put("/client") {
+        put("/clients/{email}") {
             val email = call.parameters["email"]
             if (email.isNullOrBlank()) {
-                call.respond(HttpStatusCode.BadRequest, "Email es requerido")
+                call.respond(HttpStatusCode.BadRequest, "Email es requerido.")
                 return@put
             }
             val updateClient = call.receive<UpdateClient>()
             val result = clientRepository.updateClient(updateClient, email)
             if (result) {
-                call.respond(HttpStatusCode.OK, "Cliente actualizado exitosamente")
+                call.respond(HttpStatusCode.OK, "Cliente actualizado exitosamente.")
             } else {
-                call.respond(HttpStatusCode.NotFound, "Cliente no encontrado")
+                call.respond(HttpStatusCode.NotFound, "Cliente no encontrado.")
             }
         }
 
-        delete("/client/{email}") {
+        delete("/clients/{email}") {
             val email = call.parameters["email"]
             if (email.isNullOrBlank()) {
-                call.respond(HttpStatusCode.BadRequest, "Email es requerido")
+                call.respond(HttpStatusCode.BadRequest, "Email es requerido.")
                 return@delete
             }
             val result = clientRepository.deleteClient(email)
             if (result) {
-                call.respond(HttpStatusCode.OK, "Cliente eliminado exitosamente")
+                call.respond(HttpStatusCode.OK, "Cliente eliminado exitosamente.")
             } else {
-                call.respond(HttpStatusCode.NotFound, "Cliente no encontrado")
+                call.respond(HttpStatusCode.NotFound, "Cliente no encontrado.")
+            }
+        }
+
+        post("/register") {
+            val client = call.receive<Client>()
+            val exists = clientRepository.getAllClient().any { it.email == client.email }
+            if (exists) {
+                call.respond(HttpStatusCode.Conflict, "El usuario ya está registrado.")
+            } else {
+                clientRepository.postClient(client)
+                call.respond(HttpStatusCode.Created, "Registro exitoso.")
+            }
+        }
+
+        post("/login") {
+            val credentials = call.receive<Client>()
+            val client = clientRepository.getAllClient().find { it.email == credentials.email }
+            if (client == null || client.contrasenna != credentials.contrasenna) {
+                call.respond(HttpStatusCode.Unauthorized, "Email o contraseña incorrectos.")
+            } else {
+                call.respond(HttpStatusCode.OK, "Inicio de sesión exitoso.")
             }
         }
     }

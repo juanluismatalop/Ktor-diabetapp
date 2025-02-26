@@ -2,15 +2,12 @@ package domain.usecase
 
 import domain.repository.ClientInterface
 
-class DeleteClientUseCase (val repository : ClientInterface){
-    var email: String? = null
+class DeleteClientUseCase(private val repository: ClientInterface) {
 
-    operator fun invoke() : Boolean {
-        return if (email == null) {
-            false
-        }else{
-            return repository.deleteClient(email!!)
+    operator fun invoke(email: String?): Boolean {
+        if (email.isNullOrBlank()) {
+            return false
         }
-
+        return repository.deleteClient(email)
     }
 }
