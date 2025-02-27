@@ -18,14 +18,19 @@ fun Route.authRoutes(
 ) {
     route("/auth") {
         post("/login") {
-            val request = call.receive<LoginRequest>()
-            val user = loginUseCase(request.usernameOrEmail, request.password)
-            if (user != null) {
-                call.respond(HttpStatusCode.OK, "Login successful")
-            } else {
-                call.respond(HttpStatusCode.Unauthorized, "Invalid credentials")
+            try {
+                val request = call.receive<LoginRequest>()
+                val user = loginUseCase(request.usernameOrEmail, request.password)
+                if (user != null) {
+                    call.respond(HttpStatusCode.OK, "Login successful")
+                } else {
+                    call.respond(HttpStatusCode.Unauthorized, "Invalid credentials")
+                }
+            } catch (e: Exception) {
+                call.respond(HttpStatusCode.BadRequest, "Invalid request format")
             }
         }
+
 
         post("/register") {
             val request = call.receive<RegisterRequest>()

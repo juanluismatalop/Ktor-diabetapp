@@ -15,14 +15,21 @@ fun main(args: Array<String>) {
 }
 
 fun Application.module() {
+    val config = environment.config
+
+    val dbDriver = config.property("ktor.database.driver").getString()
+    val dbUrl = config.property("ktor.database.url").getString()
+    val dbUser = config.property("ktor.database.user").getString()
+    val dbPassword = config.property("ktor.database.password").getString()
+
     configureSerialization()
-    configureDatabase()
+    configureDatabase(dbDriver, dbUrl, dbUser, dbPassword)
 
     val userRepository: UserRepository = UserRepositoryImpl()
-
     val loginUseCase = LoginUseCase(userRepository)
     val registerUseCase = RegisterUseCase(userRepository)
     val updateUserUseCase = UpdateUserUseCase(userRepository)
 
     configureRouting(loginUseCase, registerUseCase, updateUserUseCase)
 }
+
