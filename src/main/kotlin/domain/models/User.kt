@@ -1,14 +1,15 @@
 package domain.models
 
+import data.models.UserTable.varchar
 import kotlinx.serialization.Serializable
 
 @Serializable
 data class User(
     val email: String,
-    val password: String,
-    val morningRatio: Float,
-    val noonRatio: Float,
-    val afternoonRatio: Float,
-    val nightRatio: Float,
-    val sensitivityFactor: Float
+    val password:String,
+    val ratioMannana:Double,
+    val ratioMedioDia:Double,
+    val ratioTarde:Double,
+    val ratioNoche:Double,
+    val factorSensibilidad:Double
 )

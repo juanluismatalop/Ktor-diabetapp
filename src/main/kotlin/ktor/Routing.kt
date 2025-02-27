@@ -1,42 +1,26 @@
-package ktor.routes
+package ktor
 
-import domain.models.User
-import domain.usecase.*
+import domain.usecase.LoginUseCase
+import domain.usecase.RegisterUseCase
+import domain.usecase.UpdateUserUseCase
 import io.ktor.server.application.*
-import io.ktor.server.request.*
+import io.ktor.server.http.content.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
+import ktor.routing.authRoutes
 
-fun Route.userRoutes(
-    postUser: PostUser,
-    getUserByEmail: GetUserByEmail,
-    updateUser: UpdateUser,
-    deleteUser: DeleteUser
+fun Application.configureRouting(
+    loginUseCase: LoginUseCase,
+    registerUseCase: RegisterUseCase,
+    updateUserUseCase: UpdateUserUseCase
 ) {
-    route("/user") {
-        post("/register") {
-            val user = call.receive<User>()
-            postUser.execute(user)
-            call.respondText("User registered successfully")
+    routing {
+        get("/") {
+            call.respondText("Hello World!")
         }
 
-        get("/{email}") {
-            val email = call.parameters["email"] ?: return@get call.respondText("Missing email")
-            val user = getUserByEmail.execute(email) ?: return@get call.respondText("User not found")
-            call.respond(user)
-        }
+        authRoutes(loginUseCase, registerUseCase, updateUserUseCase)
 
-        put("/{email}") {
-            val email = call.parameters["email"] ?: return@put call.respondText("Missing email")
-            val updatedUser = call.receive<User>()
-            updateUser.execute(updatedUser)
-            call.respondText("User updated successfully")
-        }
-
-        delete("/{email}") {
-            val email = call.parameters["email"] ?: return@delete call.respondText("Missing email")
-            deleteUser.execute(email)
-            call.respondText("User deleted successfully")
-        }
+        staticResources("/static", "static")
     }
 }

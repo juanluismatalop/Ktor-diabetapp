@@ -1,26 +1,28 @@
 package ktor
 
-import data.repository.DataUserRepository
-import domain.usecase.*
-import io.ktor.server.application.*
-import io.ktor.server.engine.*
-import io.ktor.server.netty.*
-import io.ktor.server.routing.*
-import ktor.routes.userRoutes
+import com.ktor.configureSerialization
 
-fun main() {
-    embeddedServer(Netty, port = 8080, module = Application::module).start(wait = true)
+
+import data.repository.UserRepositoryImpl
+import domain.repository.UserRepository
+import domain.usecase.LoginUseCase
+import domain.usecase.RegisterUseCase
+import domain.usecase.UpdateUserUseCase
+import io.ktor.server.application.*
+
+fun main(args: Array<String>) {
+    io.ktor.server.netty.EngineMain.main(args)
 }
 
 fun Application.module() {
-    val userRepository = DataUserRepository()
+    configureSerialization()
+    configureDatabase()
 
-    val postUser = PostUser(userRepository)
-    val getUserByEmail = GetUserByEmail(userRepository)
-    val updateUser = UpdateUser(userRepository)
-    val deleteUser = DeleteUser(userRepository)
+    val userRepository: UserRepository = UserRepositoryImpl()
 
-    routing {
-        userRoutes(postUser, getUserByEmail, updateUser, deleteUser)
-    }
+    val loginUseCase = LoginUseCase(userRepository)
+    val registerUseCase = RegisterUseCase(userRepository)
+    val updateUserUseCase = UpdateUserUseCase(userRepository)
+
+    configureRouting(loginUseCase, registerUseCase, updateUserUseCase)
 }

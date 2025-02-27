@@ -1,6 +1,11 @@
 ktor:
-    application:
-        modules:
-            - com.ktor.ApplicationKt.module
-    deployment:
-        port: 8080
+  deployment:
+    port: 8080
+  application:
+    modules:
+      - ktor.ApplicationKt.module
+  database:
+    driver: "org.mariadb.jdbc.Driver"
+    url: "jdbc:mariadb://mariadb:3306/diabetapp"
+    user: "user"
+    password: "password"
